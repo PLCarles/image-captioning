@@ -74,6 +74,7 @@ class XTransformer(BasicModel):
             ff_dropout=cfg.MODEL.BILINEAR.DECODE_FF_DROPOUT,
             layer_num=cfg.MODEL.BILINEAR.DECODE_LAYERS)
         self.submodel = submodel
+        self.feed_mode = args.feed_mode
 
     def forward(self, **kwargs):
         # forward entry
@@ -123,18 +124,30 @@ class XTransformer(BasicModel):
     def forward_iuxray(self, att_feats):
 
         att_feats, node_feats, fc_feats = self.submodel(att_feats[:, 0], att_feats[:, 1]) #bs, 49 2048
-        att_feats = torch.cat((att_feats, node_feats), dim = 1)#Gcn+cnn
-#         att_feats = att_feats#cnn only
-#         att_feats = node_feats#gcn only
+        if self.feed_mode == 'GCNCNN':
+          att_feats = torch.cat((att_feats, node_feats), dim = 1)#Gcn+cnn
+        elif self.feed_mode == 'CNN':
+          att_feats = att_feats#cnn only
+        elif self.feed_mode == 'GCN':
+          att_feats = node_feats#gcn only
+        else:
+          raise ValueError("There is not this features")
+          
         att_feats = att_feats.permute(0,2,1)
         att_feats = att_feats.unsqueeze(-1)  # bs, 2048,74,1
         return att_feats
 
     def forward_mimiccxr(self, att_feats):
         att_feats, node_feats, fc_feats = self.submodel(att_feats)
-        att_feats = torch.cat((att_feats, node_feats), dim = 1) #torch.Size([16, 70, 2048])
-#         att_feats = att_feats#cnn only
-#         att_feats = node_feats#gcn only
+        if self.feed_mode == 'GCNCNN':
+          att_feats = torch.cat((att_feats, node_feats), dim = 1) #torch.Size([16, 70, 2048])
+        elif self.feed_mode == 'CNN':
+          att_feats = att_feats#cnn only
+        elif self.feed_mode == 'GCN':
+          att_feats = node_feats#gcn only
+        else:
+          raise ValueError("There is not this features")
+           
         att_feats = att_feats.permute(0,2,1)
         att_feats = att_feats.unsqueeze(-1)  # bs, 2048,74,1
         return att_feats
