@@ -272,8 +272,8 @@ class Trainer(object):
                            map_location=lambda storage, loc: storage)
             )
 
-        self.optim = Optimizer(self.model)
-        # self.optim = build_optimizer(args, model)
+        # self.optim = Optimizer(self.model)
+        self.optim = build_optimizer(args, model)
         self.xe_criterion = losses.create(cfg.LOSSES.XE_TYPE).cuda()
         self.rl_criterion = losses.create(cfg.LOSSES.RL_TYPE).cuda()
 
@@ -364,7 +364,7 @@ class Trainer(object):
         if self.distributed and dist.get_rank() > 0:
             return
         info_str = ' (DataTime/BatchTime: {:.3}/{:.3}) losses = {:.5}'.format(data_time.avg, batch_time.avg, losses.avg)
-        self.logger.info('Iteration ' + str(iteration) + info_str + ', lr = ' + str(self.optim.get_lr()))
+        # self.logger.info('Iteration ' + str(iteration) + info_str + ', lr = ' + str(self.optim.get_lr()))
         for name in sorted(loss_info):
             self.logger.info('  ' + name + ' = ' + str(loss_info[name]))
         data_time.reset()
