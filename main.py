@@ -49,6 +49,8 @@ def parse_args():
                         help='Specify the transformer encoder')
 
     parser.add_argument('--training_ratio', type = float, default = '1.0', help ='Select the training ratio. Recommend: 0.001, 0.005, 0.01, 0.1, 0.5 and 1.0')
+                            
+    parser.add_argument('--feed_mode', type=str, default='GCNCNN', choices=['GCN', 'CNN'], help='Which features as the input of Transformer')
 
 
 
