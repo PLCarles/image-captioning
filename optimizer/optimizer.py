@@ -123,16 +123,11 @@ class Optimizer(nn.Module):
 def build_optimizer(args, model):
     # print(model.submodel.parameters())
     #edit
-    # ve_params = list(map(id, model.submodel.parameters()))
-    # ed_params = filter(lambda x: id(x) not in ve_params, model.parameters())
-    # optimizer = torch.optim.Adam(
-    #     [{'params': model.submodel.parameters(), 'lr': 5e-5}, #edit
-    #      {'params': ed_params, 'lr': 1e-4}],
-    #     weight_decay=5e-5,
-    #     amsgrad=True
-    # )
+    ve_params = list(map(id, model.submodel.parameters()))
+    ed_params = filter(lambda x: id(x) not in ve_params, model.parameters())
     optimizer = torch.optim.Adam(
-        [{'params': model, 'lr': 5e-5}], #edit
+        [{'params': model.submodel.parameters(), 'lr': 5e-5}, #edit
+         {'params': ed_params, 'lr': 1e-4}],
         weight_decay=5e-5,
         amsgrad=True
     )
