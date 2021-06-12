@@ -10,8 +10,68 @@ import argparse
 import sys
 
 
+def parse_args():
+    """
+    Parse input arguments
+    """
+    parser = argparse.ArgumentParser(description='Image Captioning')
+    parser.add_argument('--folder', dest='folder', type=str, default=None)
+    parser.add_argument("--local_rank", type=int, default=0)
+    parser.add_argument("--resume", type=int, default=-1)
+    parser.add_argument('--image_dir', type=str, default='/content/iu_xray_resized/images/',
+                        help='the path to the directory containing the data.')
+    parser.add_argument('--ann_path', type=str, default='/content/iu_xray_resized/annotation.json',
+                        help='the path to the directory containing the data.')
+
+    parser.add_argument('--dataset_name', type=str, default='IUXRAY', choices=['IUXRAY', 'MIMICCXR','MIMICCXR_MultiImages'],
+                        help='the dataset to be used.')
+    parser.add_argument('--submodel', type=str, default='RGMG', choices=['RGMG', 'VSEGCN'],
+                        help='the knowledge graph to be used.')
+    # Encoder Mode
+    parser.add_argument('--encoder_mode', type=str, default='normal', choices=['normal', 'dualwayencoder'],
+                        help='Specify the transformer encoder')
+
+    parser.add_argument('--training_ratio', type = float, default = '1.0', help ='Select the training ratio. Recommend: 0.001, 0.005, 0.01, 0.1, 0.5 and 1.0')
+                            
+    parser.add_argument('--feed_mode', type=str, default='GCNCNN', choices=['GCN', 'CNN'], help='Which features as the input of Transformer')
+
+
+
+    if len(sys.argv) == 1:
+        parser.print_help()
+        sys.exit(1)
+
+    args = parser.parse_args()
+    return args
+
+args = parse_args()
+
+
+if args.dataset_name == 'IUXRAY' and args.feed_mode == 'GCNCNN':
+    mask_dims = 70
+    
+elif args.dataset_name == 'IUXRAY' and args.feed_mode == 'CNN':
+    mask_dims = 49
+    
+elif args.dataset_name == 'IUXRAY' and args.feed_mode == 'GCN' and args.submodel == 'VSEGCN':
+    mask_dims = 70
+    
+elif args.dataset_name == 'IUXRAY' and args.feed_mode == 'GCN' and args.submodel == 'RGMG':
+    mask_dims = 21
+  
+elif args.dataset_name == 'MIMICCXR' and args.feed_mode == 'GCNCNN':
+    mask_dims = 86
+    
+elif args.dataset_name == 'MIMICCXR' and args.feed_mode == 'CNN':
+    mask_dims = 49
+    
+elif args.dataset_name == 'MIMICCXR' and args.feed_mode == 'GCN':
+    mask_dims = 37
+else:
+    raise ValueError("There is not this combination")
+
 def sample_collate(batch):
-    mask_dim = 70
+    mask_dim = mask_dims
     indices, input_seq, target_seq, gv_feat, att_feats = zip(*batch)
 
     max_seq_length = max([len(x) for x in input_seq])
@@ -45,7 +105,7 @@ def sample_collate(batch):
     return indices, torch.LongTensor(input_seqs), torch.LongTensor(target_seqs), gv_feat, att_feats, att_mask
 
 def sample_collate_val(batch):
-    mask_dim = 70
+    mask_dim = mask_dims
 
     indices, input_seq, target_seq, gv_feat, att_feats = zip(*batch)
 
