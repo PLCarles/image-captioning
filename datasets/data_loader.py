@@ -47,9 +47,12 @@ def parse_args():
 args = parse_args()
 
 
-if args.dataset_name == 'IUXRAY' and args.feed_mode == 'GCNCNN':
+if args.dataset_name == 'IUXRAY' and args.feed_mode == 'GCNCNN' and args.submodel == 'RGMG':
     mask_dims = 70
-    
+
+elif args.dataset_name == 'IUXRAY' and args.feed_mode == 'GCNCNN' and args.submodel == 'VSEGCN':
+    mask_dims = 74
+
 elif args.dataset_name == 'IUXRAY' and args.feed_mode == 'CNN':
     mask_dims = 49
     
